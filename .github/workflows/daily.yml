@@ -18,7 +18,7 @@ jobs:
           python-version: "3.12"
       - name: Update data and review
         env:
-          WECHAT_WEBHOOK: ${{ secrets.WECHAT_WEBHOOK }}
+          FEISHU_WEBHOOK: ${{ secrets.FEISHU_WEBHOOK }}
         run: python scripts/update.py
       - name: Commit changes
         run: |

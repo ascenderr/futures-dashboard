@@ -15,7 +15,7 @@ DATA_FILE = ROOT / "data" / "breadth.json"
 REVIEW_FILE = ROOT / "review.md"
 QUOTE_URL = "https://futsseapi.eastmoney.com/list/trans/block/risk/mk0830"
 FIELDS = "name,p,zdf,vol,ccl,rz,tjd,cje,zde,o,h,l,zf,zjsj,zt,dt,dm,sc,tag,uid,zsjd"
-COMMODITY_EXCHANGES = {113, 114, 115, 142, 225}  # SHFE, DCE, CZCE, INE, GFEX
+COMMODITY_EXCHANGES = {113, 114, 115, 142, 225}
 
 
 def get_json(url: str) -> dict:
@@ -43,7 +43,7 @@ def fetch_rows() -> list[dict]:
     url = QUOTE_URL + "?" + urllib.parse.urlencode(params)
     data = get_json(url)
     rows = data.get("list") or []
-    return [r for r in rows if r.get("sc") in COMMODITY_EXCHANGES]
+    return [row for row in rows if row.get("sc") in COMMODITY_EXCHANGES]
 
 
 def same_price(a, b) -> bool:
@@ -55,24 +55,28 @@ def same_price(a, b) -> bool:
 def summarize(rows: list[dict]) -> dict:
     now = datetime.now(ZoneInfo("Asia/Shanghai"))
     up = down = flat = limit_up = limit_down = 0
-    for r in rows:
-        zdf = r.get("zdf")
-        price = r.get("p")
+
+    for row in rows:
+        zdf = row.get("zdf")
+        price = row.get("p")
         if isinstance(zdf, (int, float)) and zdf > 0:
             up += 1
         elif isinstance(zdf, (int, float)) and zdf < 0:
             down += 1
         else:
             flat += 1
-        if same_price(price, r.get("zt")):
+
+        if same_price(price, row.get("zt")):
             limit_up += 1
-        if same_price(price, r.get("dt")):
+        if same_price(price, row.get("dt")):
             limit_down += 1
+
     signal = ""
     if up < 15:
         signal = f"上涨家数过低：{up}"
     elif up > 60:
         signal = f"上涨家数过高：{up}"
+
     return {
         "date": now.date().isoformat(),
         "updated_at": now.strftime("%H:%M:%S"),
@@ -94,9 +98,9 @@ def load_history() -> list[dict]:
 
 def save_history(summary: dict) -> list[dict]:
     history = load_history()
-    history = [x for x in history if x.get("date") != summary["date"]]
+    history = [item for item in history if item.get("date") != summary["date"]]
     history.append(summary)
-    history.sort(key=lambda x: x.get("date", ""))
+    history.sort(key=lambda item: item.get("date", ""))
     DATA_FILE.write_text(
         json.dumps(history, ensure_ascii=False, indent=2) + "\n",
         encoding="utf-8",
@@ -109,6 +113,7 @@ def append_review(summary: dict) -> None:
         text = REVIEW_FILE.read_text(encoding="utf-8")
     else:
         text = "# 每日复盘\n\n"
+
     marker = f"## {summary['date']}"
     block = (
         f"{marker}\n\n"
@@ -120,6 +125,7 @@ def append_review(summary: dict) -> None:
         f"- 样本数：{summary['total']}\n"
         f"- 信号：{summary['signal'] or '无'}\n\n"
     )
+
     if marker in text:
         before = text.split(marker, 1)[0].rstrip() + "\n\n"
         rest = text.split(marker, 1)[1]
@@ -128,20 +134,25 @@ def append_review(summary: dict) -> None:
         text = before + block + tail.lstrip("\n")
     else:
         text = text.rstrip() + "\n\n" + block
+
     REVIEW_FILE.write_text(text, encoding="utf-8")
 
 
-def notify_wechat(summary: dict) -> None:
-    webhook = os.getenv("WECHAT_WEBHOOK")
+def notify_feishu(summary: dict) -> None:
+    webhook = os.getenv("FEISHU_WEBHOOK")
     if not webhook:
         return
+
     content = (
         f"期货期权每日汇总 {summary['date']}\n"
         f"上涨：{summary['up']}，下跌：{summary['down']}，平盘：{summary['flat']}\n"
         f"涨停：{summary['limit_up']}，跌停：{summary['limit_down']}\n"
         f"信号：{summary['signal'] or '无'}"
     )
-    body = json.dumps({"msgtype": "text", "text": {"content": content}}, ensure_ascii=False).encode("utf-8")
+    body = json.dumps(
+        {"msg_type": "text", "content": {"text": content}},
+        ensure_ascii=False,
+    ).encode("utf-8")
     req = urllib.request.Request(
         webhook,
         data=body,
@@ -157,10 +168,11 @@ def main() -> int:
     if not rows:
         print("no rows fetched", file=sys.stderr)
         return 1
+
     summary = summarize(rows)
     save_history(summary)
     append_review(summary)
-    notify_wechat(summary)
+    notify_feishu(summary)
     print(json.dumps(summary, ensure_ascii=False))
     return 0
 
