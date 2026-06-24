@@ -17,19 +17,27 @@
       --gray: #9ca3af;
       --warn: #f59e0b;
     }
+
     * { box-sizing: border-box; }
+
     body {
       margin: 0;
       background: var(--bg);
       color: var(--text);
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Microsoft YaHei", sans-serif;
     }
+
     main {
       max-width: 1160px;
       margin: 0 auto;
       padding: 24px;
     }
-    h1 { margin: 0 0 18px; font-size: 24px; }
+
+    h1 {
+      margin: 0 0 18px;
+      font-size: 24px;
+    }
+
     .block {
       display: grid;
       grid-template-columns: 1fr 170px;
@@ -40,22 +48,50 @@
       background: var(--card);
       box-shadow: 0 8px 30px rgb(0 0 0 / 20%);
     }
+
     .head {
       display: flex;
       justify-content: space-between;
       gap: 12px;
       margin-bottom: 10px;
     }
-    .title { font-size: 18px; font-weight: 700; }
-    .meta { color: var(--muted); font-size: 13px; }
-    .chart-wrap { overflow-x: auto; }
-    svg { width: 100%; min-width: 720px; height: 300px; display: block; }
-    .axis { stroke: #334155; stroke-width: 1; }
-    .label { fill: var(--muted); font-size: 11px; }
+
+    .title {
+      font-size: 18px;
+      font-weight: 700;
+    }
+
+    .meta {
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .chart-wrap {
+      overflow-x: auto;
+    }
+
+    svg {
+      width: 100%;
+      min-width: 720px;
+      height: 300px;
+      display: block;
+    }
+
+    .axis {
+      stroke: #334155;
+      stroke-width: 1;
+    }
+
+    .label {
+      fill: var(--muted);
+      font-size: 11px;
+    }
+
     .side {
       border-left: 1px solid #1f2937;
       padding-left: 16px;
     }
+
     .signal {
       padding: 12px;
       border-radius: 12px;
@@ -64,22 +100,26 @@
       font-size: 14px;
       line-height: 1.5;
     }
+
     .signal.warn {
       background: rgb(245 158 11 / 12%);
       color: #fbbf24;
       border: 1px solid rgb(245 158 11 / 35%);
     }
+
     .numbers {
       margin-top: 16px;
       display: grid;
       gap: 8px;
       font-size: 14px;
     }
+
     .num {
       display: flex;
       justify-content: space-between;
       color: var(--muted);
     }
+
     .legend {
       display: flex;
       flex-wrap: wrap;
@@ -88,6 +128,7 @@
       color: var(--muted);
       font-size: 12px;
     }
+
     .dot {
       display: inline-block;
       width: 10px;
@@ -95,6 +136,7 @@
       border-radius: 2px;
       margin-right: 4px;
     }
+
     @media (max-width: 860px) {
       .block { grid-template-columns: 1fr; }
       .side { border-left: 0; padding-left: 0; }
@@ -108,7 +150,7 @@
       <div>
         <div class="head">
           <div>
-            <div class="title">国内商品期货主力合约整体涨跌</div>
+            <div class="title">国内商品期货主力合约整体涨跌（最近 10 个交易日）</div>
             <div class="meta" id="meta">加载中…</div>
           </div>
         </div>
@@ -130,26 +172,34 @@
 
   <script>
     const colors = {
-      up: '#ef4444',
-      limitUp: '#991b1b',
-      down: '#22c55e',
-      limitDown: '#166534',
-      flat: '#9ca3af'
+      up: "#ef4444",
+      limitUp: "#991b1b",
+      down: "#22c55e",
+      limitDown: "#166534",
+      flat: "#9ca3af"
     };
 
     const esc = s => String(s).replace(/[&<>"']/g, c => ({
-      '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+      "&": "&amp;",
+      "<": "&lt;",
+      ">": "&gt;",
+      "\"": "&quot;",
+      "'": "&#39;"
     }[c]));
 
     function draw(rows) {
-      const data = rows.slice(-60);
-      const w = Math.max(720, data.length * 18 + 80);
-      const h = 300, top = 24, bottom = 42, left = 36, right = 16;
+      const data = rows.slice(-10);
+      const w = 720;
+      const h = 300;
+      const top = 24;
+      const bottom = 42;
+      const left = 36;
+      const right = 16;
       const zero = 150;
       const maxVal = Math.max(10, ...data.map(d => Math.max(d.up, d.down)));
       const scale = (zero - top) / maxVal;
-      const gap = 5;
-      const bw = Math.max(7, (w - left - right) / data.length - gap);
+      const gap = 10;
+      const bw = (w - left - right - gap * (data.length - 1)) / data.length;
 
       let bars = `<line class="axis" x1="${left}" y1="${zero}" x2="${w - right}" y2="${zero}"/>`;
       bars += `<text class="label" x="4" y="${zero + 4}">0</text>`;
@@ -164,50 +214,61 @@
         const limitUpH = d.limit_up * scale;
         const downH = normalDown * scale;
         const limitDownH = d.limit_down * scale;
+
         bars += `<rect x="${x}" y="${zero - upH}" width="${bw}" height="${upH}" fill="${colors.up}"/>`;
         bars += `<rect x="${x}" y="${zero - upH - limitUpH}" width="${bw}" height="${limitUpH}" fill="${colors.limitUp}"/>`;
         bars += `<rect x="${x}" y="${zero}" width="${bw}" height="${downH}" fill="${colors.down}"/>`;
         bars += `<rect x="${x}" y="${zero + downH}" width="${bw}" height="${limitDownH}" fill="${colors.limitDown}"/>`;
-        if (d.flat) bars += `<circle cx="${x + bw / 2}" cy="${zero}" r="${Math.min(5, 2 + d.flat / 2)}" fill="${colors.flat}"/>`;
-        if (i % Math.ceil(data.length / 8) === 0) {
-          bars += `<text class="label" x="${x - 8}" y="${h - 14}">${esc(d.date.slice(5))}</text>`;
+
+        if (d.flat) {
+          bars += `<circle cx="${x + bw / 2}" cy="${zero}" r="${Math.min(5, 2 + d.flat / 2)}" fill="${colors.flat}"/>`;
         }
+
+        bars += `<text class="label" x="${x + 2}" y="${h - 14}">${esc(d.date.slice(5))}</text>`;
       });
-      document.getElementById('chart').innerHTML = `<svg viewBox="0 0 ${w} ${h}" role="img">${bars}</svg>`;
+
+      document.getElementById("chart").innerHTML =
+        `<svg viewBox="0 0 ${w} ${h}" role="img">${bars}</svg>`;
     }
 
     function render(rows) {
       if (!rows.length) return;
+
       const latest = rows[rows.length - 1];
-      document.getElementById('meta').textContent = `最近更新：${latest.date} ${latest.updated_at || ''}，样本 ${latest.total} 个`;
+      const visible = rows.slice(-10);
+      const days = visible.length;
+
+      document.getElementById("meta").textContent =
+        `最近更新：${latest.date} ${latest.updated_at || ""}，样本 ${latest.total} 个，当前已累计 ${days} / 10 个交易日`;
+
       draw(rows);
 
-      const signal = document.getElementById('signal');
+      const signal = document.getElementById("signal");
       if (latest.up < 15) {
-        signal.className = 'signal warn';
+        signal.className = "signal warn";
         signal.textContent = `上涨家数过低：${latest.up}`;
       } else if (latest.up > 60) {
-        signal.className = 'signal warn';
+        signal.className = "signal warn";
         signal.textContent = `上涨家数过高：${latest.up}`;
       } else {
-        signal.className = 'signal';
-        signal.textContent = '暂无信号';
+        signal.className = "signal";
+        signal.textContent = "暂无信号";
       }
 
-      document.getElementById('numbers').innerHTML = [
-        ['上涨', latest.up],
-        ['下跌', latest.down],
-        ['涨停', latest.limit_up],
-        ['跌停', latest.limit_down],
-        ['平盘', latest.flat]
-      ].map(([k, v]) => `<div class="num"><span>${k}</span><span>${v}</span></div>`).join('');
+      document.getElementById("numbers").innerHTML = [
+        ["上涨", latest.up],
+        ["下跌", latest.down],
+        ["涨停", latest.limit_up],
+        ["跌停", latest.limit_down],
+        ["平盘", latest.flat]
+      ].map(([k, v]) => `<div class="num"><span>${k}</span><span>${v}</span></div>`).join("");
     }
 
-    fetch('data/breadth.json?ts=' + Date.now())
+    fetch("data/breadth.json?ts=" + Date.now())
       .then(r => r.json())
       .then(render)
       .catch(() => {
-        document.getElementById('meta').textContent = '数据加载失败';
+        document.getElementById("meta").textContent = "数据加载失败";
       });
   </script>
 </body>
