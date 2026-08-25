@@ -482,5 +482,16 @@
     "limit_down": 0,
     "flat": 5,
     "signal": ""
+  },
+  {
+    "date": "2026-08-25",
+    "updated_at": "16:56:05",
+    "total": 82,
+    "up": 28,
+    "down": 48,
+    "limit_up": 0,
+    "limit_down": 0,
+    "flat": 6,
+    "signal": ""
   }
 ]
