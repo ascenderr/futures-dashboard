@@ -529,13 +529,13 @@
   },
   {
     "date": "2026-09-01",
-    "updated_at": "00:07:28",
+    "updated_at": "21:27:43",
     "total": 82,
-    "up": 44,
-    "down": 33,
+    "up": 39,
+    "down": 36,
     "limit_up": 0,
     "limit_down": 0,
-    "flat": 5,
+    "flat": 7,
     "signal": ""
   }
 ]
