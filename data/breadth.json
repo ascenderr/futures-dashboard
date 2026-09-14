@@ -625,5 +625,16 @@
     "limit_down": 0,
     "flat": 64,
     "signal": "上涨家数过低：1"
+  },
+  {
+    "date": "2026-09-14",
+    "updated_at": "22:59:07",
+    "total": 81,
+    "up": 36,
+    "down": 38,
+    "limit_up": 0,
+    "limit_down": 0,
+    "flat": 7,
+    "signal": ""
   }
 ]
