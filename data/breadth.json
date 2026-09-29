@@ -738,13 +738,13 @@
   },
   {
     "date": "2026-09-29",
-    "updated_at": "00:43:30",
+    "updated_at": "22:49:33",
     "total": 82,
-    "up": 32,
-    "down": 43,
+    "up": 37,
+    "down": 39,
     "limit_up": 0,
     "limit_down": 0,
-    "flat": 7,
+    "flat": 6,
     "signal": ""
   }
 ]
