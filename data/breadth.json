@@ -826,13 +826,13 @@
   },
   {
     "date": "2026-10-13",
-    "updated_at": "01:49:15",
+    "updated_at": "23:54:14",
     "total": 82,
-    "up": 36,
-    "down": 41,
+    "up": 32,
+    "down": 44,
     "limit_up": 0,
     "limit_down": 0,
-    "flat": 5,
+    "flat": 6,
     "signal": ""
   }
 ]
