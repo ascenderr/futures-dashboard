@@ -1065,5 +1065,16 @@
     "limit_down": 0,
     "flat": 5,
     "signal": ""
+  },
+  {
+    "date": "2026-11-14",
+    "updated_at": "00:14:02",
+    "total": 83,
+    "up": 49,
+    "down": 28,
+    "limit_up": 0,
+    "limit_down": 0,
+    "flat": 6,
+    "signal": ""
   }
 ]
